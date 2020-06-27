@@ -1,0 +1,13 @@
+vc1*
+*bin/
+*lib/
+*libs/
+build/
+build.xml
+gen/
+local.properties
+proguard-project.txt
+project.properties
+testdata/
+*.bak
+.blend
