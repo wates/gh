@@ -28,9 +28,8 @@ namespace gh {
     inline virtual ~ViewportMessage() {};
   };
 
-  class Viewport
+  struct Viewport
   {
-  public:
     virtual void Close() = 0;
     virtual void* GetWindowHandle() = 0;
     virtual void MessageFetch() = 0;
