@@ -5,7 +5,6 @@
 #include "../main/underscore.h"
 #include "graphics_d3d9.h"
 #include "../sys/viewport.h"
-#include "../main/md5.h"
 #include "fertex.h"
 #include <sstream>
 #include <vector>
@@ -681,9 +680,6 @@ namespace gh {
     bool GraphicsD3D::SetupShader(int format)
     {
       std::vector<char> t;
-      MD5 md5;
-      md5.Update(&format, 4);
-      MD5sum sum;
       CompiledShader* cs = 0;
 
       std::vector<unsigned char> config;
@@ -693,18 +689,15 @@ namespace gh {
       {
         if (shader_slot_[i] == shader::ShaderEnd())
         {
-          md5.Final();
           break;
         }
         if (shader_slot_[i] == shader::ShaderIgnore())
           continue;
         unsigned char type = shader_slot_[i]->GetClassID();
-        md5.Update(&type, 1);
         config.push_back(type);
       }
-      memcpy(sum.sum, md5.Result(), sizeof(sum.sum));
-      if (compiled_shader_.end() != compiled_shader_.find(sum)) {
-        cs = &compiled_shader_[sum];
+      if (compiled_shader_.end() != compiled_shader_.find(config)) {
+        cs = &compiled_shader_[config];
       }
 
       bool need_compile = cs == NULL;
@@ -728,7 +721,7 @@ namespace gh {
 
       if (need_compile || need_build)
       {
-        cs = &compiled_shader_[sum];
+        cs = &compiled_shader_[config];
 
         int pipetype = 0;
         std::string vertex_constant;
@@ -830,7 +823,7 @@ namespace gh {
               elem[e++] = VertexElement(0, offset + 24, D3DDECLTYPE_FLOAT2, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD, 3);
               offset += GetFertexSize(FTX_TEX4);
             }
-            elem[e++] = VertexElement(0xFF, 0, D3DDECLTYPE_UNUSED, 0, 0, 0);
+            elem[e++] = D3DDECL_END();
 
             device_->CreateVertexDeclaration(elem, &cs->vd);
 
@@ -1078,7 +1071,7 @@ namespace gh {
       return true;
     }
     //draw
-    bool GraphicsD3D::DrawPrimitive(const VertexBuffer* vb)
+    bool GraphicsD3D::DrawPrimitive(const VertexBuffer* vb, unsigned int primitivecount)
     {
       VertexBufferD3D* vbb = (VertexBufferD3D*)vb;
       if (D3D_OK != device_->SetStreamSource(0, vbb->buffer_, 0, GetFertexSize(vb->Format())))
@@ -1087,7 +1080,7 @@ namespace gh {
       if (!SetupShader(vb->Format()))
         return false;
 
-      if (D3D_OK != device_->DrawPrimitive(D3DPT_TRIANGLELIST, 0, vb->Vertices() / 3))
+      if (D3D_OK != device_->DrawPrimitive(D3DPT_TRIANGLELIST, 0, primitivecount ? primitivecount : vb->Vertices() / 3))
         return false;
       return true;
     }
@@ -1120,7 +1113,7 @@ namespace gh {
     {
       last_vb_ = NULL;
       SetupShader(vertexformat);
-      device_->DrawPrimitiveUP(EqualizeType(type), primitivecount, vtx, GetFertexSize(vertexformat));
+      auto ret = device_->DrawPrimitiveUP(EqualizeType(type), primitivecount, vtx, GetFertexSize(vertexformat));
       return true;
     }
     bool GraphicsD3D::DrawIndexedPrimitiveUP(PrimitiveType type, unsigned int primitivecount, const unsigned short* idx, const void* vtx, unsigned int vertexcount, unsigned int vertexformat)

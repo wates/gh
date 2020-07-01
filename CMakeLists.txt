@@ -37,6 +37,10 @@ if(ANDROID)
 endif(ANDROID)
 
 add_subdirectory(third)
+include_directories(third/json11)
+include_directories(third/zlib/include)
+include_directories(third/freetype/include)
+
 add_subdirectory(src)
 if(MSVC)
   add_subdirectory(test)

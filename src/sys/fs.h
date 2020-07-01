@@ -14,6 +14,7 @@ namespace gh {
     virtual LoadStatus Status(const std::string& alias) = 0;
     virtual int Length(const std::string& alias) = 0;
     virtual const void* Data(const std::string& alias) = 0;
+    virtual ~Fs();
 
     static Fs* Create();
   };

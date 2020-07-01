@@ -36,4 +36,8 @@ add_library(gh
   gfx/shader.cc
   gfx/shader_hlsl.h
   gfx/shader_hlsl.cc
+  gfx/shape.h
+  gfx/shape.cc
+  gfx/fontmap.h
+  gfx/fontmap.cc
 )

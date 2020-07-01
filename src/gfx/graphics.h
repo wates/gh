@@ -212,7 +212,7 @@ namespace gh {
     virtual bool SetAlphaBlendMode(AlphaBlendMode mode) = 0;
 
     virtual bool GetRenderTargetData(Texture* tex) = 0;
-    virtual bool SetShader(shader::Shader *p, int slot) = 0;
+    virtual bool SetShader(shader::Shader* p, int slot) = 0;
 
     virtual bool CreateRenderTarget(int width, int height, TextureFormat color, TextureFormat depth, Texture** tex) = 0;
     virtual bool CreateVertexBuffer(VertexBuffer** vb, int format, int vertices) = 0;
@@ -220,14 +220,14 @@ namespace gh {
     virtual bool CreateTexture(Texture** tex, int width, int height, TextureFormat format, MemoryPool pool = POOL_MANAGED) = 0;
 
     virtual shader::Shader* CreateShader(shader::ShaderType st) = 0;
-    virtual bool DeleteShader(shader::Shader *shader) = 0;
+    virtual bool DeleteShader(shader::Shader* shader) = 0;
 
     template<shader::ShaderType T>typename shader::TypeInterface<T>::type* CreateShader()
     {
       return static_cast<typename shader::TypeInterface<T>::type*>(this->CreateShader(T));
     }
 
-    virtual bool DrawPrimitive(const VertexBuffer* vb) = 0;
+    virtual bool DrawPrimitive(const VertexBuffer* vb, unsigned int primitivecount = 0) = 0;
     virtual bool DrawIndexedPrimitive(const VertexBuffer* vb, const IndexBuffer* ib, int offset, int triangles) = 0;
     virtual bool DrawPrimitiveUP(PrimitiveType type, unsigned int primitivecount, const void* vtx, unsigned int vertexformat) = 0;
     virtual bool DrawIndexedPrimitiveUP(PrimitiveType type, unsigned int primitivecount, const unsigned short* idx, const void* vtx, unsigned int vertexcount, unsigned int vertexformat) = 0;

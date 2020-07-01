@@ -65,6 +65,10 @@ namespace gh {
     }
   };
 
+  Fs::~Fs() {
+
+  }
+
   Fs* Fs::Create() {
     return new FsImpl;
   }

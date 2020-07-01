@@ -6,13 +6,12 @@
 
 #include "graphics.h"
 #include "color.h"
-#include "../main/md5.h"
 
 #include "shader_hlsl.h"
 
 #include <d3d9.h>
 #include <map>
-
+#include <vector>
 //#include <d3dx9.h>
 
 namespace gh {
@@ -121,7 +120,7 @@ namespace gh {
       bool DeleteShader(shader::Shader* shader);
 
       //draw
-      bool DrawPrimitive(const VertexBuffer* vb);
+      bool DrawPrimitive(const VertexBuffer* vb,unsigned int primitivecount);
       bool DrawIndexedPrimitive(const VertexBuffer* vb, const IndexBuffer* ib, int offset, int triangles);
       bool DrawPrimitiveUP(PrimitiveType type, unsigned int primitivecount, const void* vtx, unsigned int vertexformat);
       bool DrawIndexedPrimitiveUP(PrimitiveType type, unsigned int primitivecount, const unsigned short* idx, const void* vtx, unsigned int vertexcount, unsigned int vertexformat);
@@ -135,7 +134,7 @@ namespace gh {
       int height_;
 
       class shader::Shader* shader_slot_[MAX_SHADER_CHAIN];
-      std::map<MD5sum, CompiledShader> compiled_shader_;
+      std::map<std::vector<unsigned char>, CompiledShader> compiled_shader_;
       RenderTargetTextureD3D* render_target_;
       //RenderTargetTextureContent back_buffer_;
       unsigned int render_state_[RENDERSTATE_NUM];
