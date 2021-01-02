@@ -31,19 +31,6 @@ namespace gh {
       int pixel_register_offset[MAX_SHADER_CHAIN];
     };
 
-    struct MD5sum
-    {
-      unsigned char sum[16];
-      bool operator>(const MD5sum& s)const
-      {
-        return memcmp(sum, s.sum, 16) > 0;
-      }
-      bool operator<(const MD5sum& s)const
-      {
-        return memcmp(sum, s.sum, 16) < 0;
-      }
-    };
-
     struct TextureD3D
       :public Texture
     {

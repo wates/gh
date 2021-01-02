@@ -241,6 +241,7 @@ namespace gh {
       pipe_.from->Fetch();
       Sleep(1);
     }
+    th.join();
   }
 
   void* ViewportBody::GetWindowHandle()

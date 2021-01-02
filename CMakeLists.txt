@@ -42,6 +42,7 @@ include_directories(third/zlib/include)
 include_directories(third/freetype/include)
 
 add_subdirectory(src)
+add_subdirectory(game)
 if(MSVC)
   add_subdirectory(test)
 endif()

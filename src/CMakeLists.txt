@@ -40,4 +40,11 @@ add_library(gh
   gfx/shape.cc
   gfx/fontmap.h
   gfx/fontmap.cc
+  gfx/png.h
+  gfx/png.cc
 )
+
+add_executable(editor
+  editor/main.cc
+)
+target_link_libraries(editor gh freetype)
