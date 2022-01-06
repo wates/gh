@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <string>
 #include <locale.h>
+#include <functional>
 #if defined(ANDROID)
 #include <sstream>
 #endif
@@ -181,6 +182,23 @@ static struct underscore {
   template<typename T>
   ext_string<T> operator()(std::basic_string<T> &str) {
     return ext_string<T>(str);
+  }
+
+  template<typename T>
+  struct ext_vector :
+    public std::vector<T> {
+    typedef typename std::vector<T> MyT;
+    MyT& src_;
+    ext_vector(MyT& src)
+      :src_(src) {}
+    void each(std::function<void(T)> f) {
+      std::for_each(src_.begin(), src_.end(), f);
+    }
+  };
+
+  template<typename T>
+  ext_vector<T> operator()(std::vector<T>& str) {
+    return ext_vector<T>(str);
   }
 }_;
 

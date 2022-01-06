@@ -248,29 +248,17 @@ namespace gh
 
   inline Vector2 Vec2(const float x, const float y)
   {
-    Vector2 v;
-    v.x = x;
-    v.y = y;
-    return v;
+    return {x,y};
   }
 
   inline Vector3 Vec3(const float x, const float y, const float z)
   {
-    Vector3 v;
-    v.x = x;
-    v.y = y;
-    v.z = z;
-    return v;
+    return { x,y,z };
   }
 
   inline Vector4 Vec4(const float x, const float y, const float z, const float w)
   {
-    Vector4 v;
-    v.x = x;
-    v.y = y;
-    v.z = z;
-    v.w = w;
-    return v;
+    return { x,y,z,w };
   }
 
 

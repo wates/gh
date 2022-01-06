@@ -1,6 +1,6 @@
 
-#ifndef WTS_GFX_SHADER_H_
-#define WTS_GFX_SHADER_H_
+#ifndef GH_SHADER_H_
+#define GH_SHADER_H_
 
 #include "geometory.h"
 #include "color.h"

@@ -18,6 +18,7 @@ namespace gh {
 
     static Fs* Create();
   };
+  extern struct Fs* fs;
 }
 
 #endif // !FS_H_INCLUDED

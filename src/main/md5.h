@@ -1,6 +1,6 @@
 
-#ifndef WTS_MD5_H_
-#define WTS_MD5_H_
+#ifndef GH_MD5_H_
+#define GH_MD5_H_
 
 #include <stdint.h>
 

@@ -9,7 +9,9 @@
 #include <sstream>
 #include <vector>
 #include <map>
-
+#ifdef _DEBUG
+#include <iostream>
+#endif
 #include <stdio.h>
 #include <d3dx9.h>
 
@@ -973,6 +975,8 @@ namespace gh {
               std::vector<char> data;
               _.push(data, vs.str().data(), vs.str().size() - 1);
               _.push(data, (char*)dasm->GetBufferPointer(), dasm->GetBufferSize() - 1);
+              std::cout << fn << std::endl;
+              std::cout << vs.str() << std::endl;
               //WriteFile(fn.data(), data);
 #endif
             }

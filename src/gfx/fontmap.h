@@ -7,15 +7,14 @@
 
 namespace gh {
 
-  struct Frect {
-    float x1;
-    float y1;
-    float x2;
-    float y2;
-  };
-
   struct Fontmap
   {
+    struct Frect {
+      float x1;
+      float x2;
+      float y1;
+      float y2;
+    };
     virtual bool Init(Graphics* dev) = 0;
     /** enable outline
      * @param rad radius

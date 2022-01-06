@@ -1,6 +1,6 @@
 
-#ifndef WTS_CORE_PNG_H_
-#define WTS_CORE_PNG_H_
+#ifndef GH_CORE_PNG_H_
+#define GH_CORE_PNG_H_
 
 #include <stdint.h>
 

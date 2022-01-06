@@ -9,6 +9,7 @@ add_library(gh
   main/pipe.cc
   main/pipe.h
   main/underscore.h
+  main/converter.h
   main/observer.cc
   main/observer.h
   main/msgq.cc
@@ -24,6 +25,10 @@ add_library(gh
   gfx/graphics.h
   gfx/graphics_d3d9.h
   gfx/graphics_d3d9.cc
+  gfx/polygon.h
+  gfx/polygon.cc
+  gfx/render.h
+  gfx/render.cc
   gfx/color.h
   gfx/color.cc
   gfx/fertex.h

@@ -540,7 +540,7 @@ void FontmapImpl::LoadChar(wchar_t c)
   }
 }
 
-Frect FontmapImpl::GetSize(const wchar_t *str, float padding)
+Fontmap::Frect FontmapImpl::GetSize(const wchar_t *str, float padding)
 {
   Frect f = { 0, 0, 0, 0 };
   float off_x = 0;

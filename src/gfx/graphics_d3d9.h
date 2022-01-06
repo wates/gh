@@ -1,6 +1,6 @@
 
-#ifndef WTS_GFX_GRAPHICS_D3D9_H_
-#define WTS_GFX_GRAPHICS_D3D9_H_
+#ifndef GH_GRAPHICS_D3D9_H_
+#define GH_GRAPHICS_D3D9_H_
 
 #ifdef _WIN32
 

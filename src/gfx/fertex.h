@@ -1,10 +1,11 @@
 
-#ifndef WTS_GFX_FERTEX_H_
-#define WTS_GFX_FERTEX_H_
+#ifndef GH_FERTEX_H_
+#define GH_FERTEX_H_
 
 #include "geometory.h"
 
 namespace gh {
+
   static const int FTX_POSITION = 0x0001;//xyz
   static const int FTX_NORMAL = 0x0002;//xyz
   static const int FTX_DIFFUSE = 0x0004;//rgba
@@ -354,6 +355,7 @@ namespace gh {
     int offset = GetFertexSize(format & (FTX_POSITION | FTX_NORMAL | FTX_TANGENT | FTX_DIFFUSE | FTX_SPECULAR | FTX_WEIGHTMASK));
     return *(FTX_Type<FTX_TEX1>::type*)(((char*)ftx) + offset);
   }
+
 }
 
 #endif

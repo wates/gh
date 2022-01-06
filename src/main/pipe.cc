@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-namespace wts
+namespace
 {
   const char* memmem(const char* p, int sz_p, const char* cmp, int sz_cmp)
   {
@@ -20,7 +20,6 @@ namespace wts
   }
 
 }
-
 
 //////////////////////////////////
 // binary print

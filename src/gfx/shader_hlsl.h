@@ -1,6 +1,6 @@
 
-#ifndef WTS_GFX_SHADER_D3D9_H_
-#define WTS_GFX_SHADER_D3D9_H_
+#ifndef GH_SHADER_D3D9_H_
+#define GH_SHADER_D3D9_H_
 
 #ifdef _WIN32
 

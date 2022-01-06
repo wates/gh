@@ -9,7 +9,7 @@ namespace gh {
     :public Fs {
 
     struct File {
-      LoadStatus state;
+      LoadStatus state=Loading;
       vector<unsigned char>* buffer;
     };
 
@@ -69,7 +69,12 @@ namespace gh {
 
   }
 
+  struct Fs* fs = 0;
+
   Fs* Fs::Create() {
-    return new FsImpl;
+    if (!fs) {
+      fs = new FsImpl;
+    }
+    return fs;
   }
 }

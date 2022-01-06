@@ -1,6 +1,6 @@
 
-#ifndef WTS_GRAPHICS_H_
-#define WTS_GRAPHICS_H_
+#ifndef GH_GRAPHICS_H_
+#define GH_GRAPHICS_H_
 
 #include "color.h"
 #include "shader.h"

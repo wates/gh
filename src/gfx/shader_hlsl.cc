@@ -579,7 +579,7 @@ namespace gh {
       used_constant += 1;
 
       _(main) << "diffuse.xyz=diffuse.xyz*directionallight_color.xyz*dot(normal,directionallight_direction);\n";
-      //_(main) << "diffuse.xyz=DiffuseLight_diffuse.xyz*diffuse.xyz;\n";
+      _(main) << "diffuse.xyz=DiffuseLight_diffuse.xyz*diffuse.xyz;\n";
       //_(main) << "diffuse.xyz=max(DiffuseLight_ambient,diffuse.xyz);\n";
     }
 
