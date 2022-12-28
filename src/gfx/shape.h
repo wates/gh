@@ -78,6 +78,7 @@ namespace gh{
     void CenteringX();
     void Scale(float x);
     float Magnitude()const;
+    void SubsetMerge();//discard materials
   };
 
 }

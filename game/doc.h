@@ -83,6 +83,8 @@ struct DocRender :public Render {
   gh::Graphics* gf;
   gh::ManagedGraphics* mg;
   gh::shader::Camera* cam;
+  gh::shader::DirectionalLight* dl;
+  gh::shader::ShadowMap* shadow;
   std::map<std::string, gh::Mesh*> mesh;
   DocRender(gh::Graphics* gf);
   void Draw(Node* root);

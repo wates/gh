@@ -885,22 +885,29 @@ namespace gh {
             }
             if (FTX_SPECULAR & pipetype)
             {
-              pipe << "float3 specular:COLOR" << color_slot++ << ";\n";
+              pipe << "float4 specular:COLOR" << color_slot++ << ";\n";
               pipe_vs_program << "output.specular=specular;\n";
-              pipe_ps_program << "float3 specular=input.specular;\n";
+              pipe_ps_program << "float4 specular=input.specular;\n";
             }
             else
             {
               if (FTX_VIEW_DIRECTION & pipetype)
               {
-                pipe_ps_program << "float3 specular=float3(0,0,0);\n";
+                pipe_ps_program << "float4 specular=float4(0,0,0,0);\n";
               }
             }
             for (int i = 0; i < ((FTX_TEXTUREMASK & pipetype) >> 8); i++)
             {
-              pipe << "float2 uv" << i << ":TEXCOORD" << i << ";\n";
-              pipe_vs_program << "output.uv" << i << "=uv" << i << ";\n";
-              pipe_ps_program << "float2 uv" << i << "=input.uv" << i << ";\n";
+              if (FTX_FLOAT4_TEX1 & pipetype) {
+                pipe << "float4 uv" << i << ":TEXCOORD" << i << ";\n";
+                pipe_vs_program << "output.uv" << i << "=uv" << i << ";\n";
+                pipe_ps_program << "float4 uv" << i << "=input.uv" << i << ";\n";
+              }
+              else {
+                pipe << "float2 uv" << i << ":TEXCOORD" << i << ";\n";
+                pipe_vs_program << "output.uv" << i << "=uv" << i << ";\n";
+                pipe_ps_program << "float2 uv" << i << "=input.uv" << i << ";\n";
+              }
             }
 
             semantics_ps_in = pipe.str();
@@ -927,7 +934,7 @@ namespace gh {
             if (FTX_DIFFUSE & format)
               vs << ",in float4 diffuse:COLOR0\n";
             if (FTX_SPECULAR & format)
-              vs << ",in float3 specular:COLOR1\n";
+              vs << ",in float4 specular:COLOR1\n";
             if (FTX_WEIGHT1 == (FTX_WEIGHTMASK & format))
               vs << ",in float blendindex:BLENDINDICES\n";
             if (FTX_WEIGHT2 == (FTX_WEIGHTMASK & format))
@@ -935,8 +942,14 @@ namespace gh {
               vs << ",in float2 blendindex:BLENDINDICES\n";
               vs << ",in float2 blendweight:BLENDWEIGHT\n";
             }
-            for (int i = 0; i < ((FTX_TEXTUREMASK & format) >> 8); i++)
-              vs << ",in float2 uv0:TEXCOORD" << i++ << "\n";
+            for (int i = 0; i < ((FTX_TEXTUREMASK & format) >> 8); i++) {
+              if (FTX_FLOAT4_TEX1 & pipetype) {
+                vs << ",in float4 uv" << i << ":TEXCOORD" << i++ << "\n";
+              }
+              else {
+                vs << ",in float2 uv" << i << ":TEXCOORD" << i++ << "\n";
+              }
+            }
             vs << "){\n";
 
             // main.
@@ -944,7 +957,15 @@ namespace gh {
             if ((FTX_DIFFUSE & pipetype) && !(FTX_DIFFUSE & format))
               vs << "float4 diffuse=float4(1,1,1,1);\n";
             if ((FTX_SPECULAR & pipetype) && !(FTX_SPECULAR & format))
-              vs << "float3 specular=float3(0,0,0);\n";
+              vs << "float4 specular=float4(0,0,0,0);\n";
+            if ((FTX_TEX1 & pipetype) && !(FTX_TEX1 & format)) {
+              if (FTX_FLOAT4_TEX1) {
+                vs << "float4 uv0=float4(0,0,0,0);\n";
+              }
+              else {
+                vs << "float2 uv0=float2(0,0);\n";
+              }
+            }
             vs << vertex_program;
             vs << pipe_vs_program.str();
             vs << "return output;\n";
@@ -955,10 +976,13 @@ namespace gh {
               /*D3DXSHADER_DEBUG*/0, &buf, &msg, NULL))
             {
               const char* error = (const char*)msg->GetBufferPointer();
+#ifdef _DEBUG
               std::string prog = vs.str();
               prog += "// ";
               prog += error;
+              std::cout << prog << std::endl << vs.str() << std::endl;
               //WriteFile("vs_error.txt", prog.data());
+#endif
               DebugBreak();
             }
             else
@@ -1026,6 +1050,8 @@ namespace gh {
               std::vector<char> data;
               _.push(data, ps.str().data(), ps.str().size() - 1);
               _.push(data, (char*)dasm->GetBufferPointer(), dasm->GetBufferSize() - 1);
+              std::cout << fn << std::endl;
+              std::cout << ps.str() << std::endl;
               //WriteFile(fn.data(), data);
 #endif
             }

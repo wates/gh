@@ -219,6 +219,42 @@ namespace gh {
       Vector4 diffuse_;
     };
 
+    class SoftLightBody
+      :public SoftLight
+      , public ShaderGenerator
+    {
+      ClassID(SoftLight);
+
+      void Vertex(int format, std::string& constant, int& used_constant, int& used_sampler, std::string& main);
+      int PipeType(int format);
+      void Pixel(int format, std::string& constant, int& used_constant, int& used_sampler, std::string& main);
+      void SetupConstant(ShaderConstant& sc);
+
+      inline void Direction(const Vector3& dir) {
+        direction_ = dir;
+        direction_.Normalize();
+
+      }
+      inline void Diffuse(const Color& color) {
+        diffuse_ = color;
+      }
+      inline void Specular(const Color& color) {
+        specular_ = color;
+      }
+      inline void Power(float power) {
+        power_ = power;
+      }
+      inline void Ambient(const Color& color) {
+        ambient_ = color;
+      }
+
+      Color diffuse_ = 0xffffffff;
+      Color ambient_ = 0x00000000;
+      Color specular_ = 0x00000000;
+      float power_ = 0;
+      Vector4 direction_ = { 0,1,0,0 };
+    };
+
     class FractalBody
       :public Fractal
       , public ShaderGenerator
@@ -590,6 +626,110 @@ namespace gh {
       void SetTexture(Texture* t);
 
       Texture* diffuse_;
+      int sampler_;
+      int uv_;
+    };
+
+    class ShadowMapBody
+      :public ShadowMap
+      , public ShaderGenerator
+    {
+    public:
+      ShadowMapBody();
+    private:
+
+      ClassID(ShadowMap);
+
+      void Vertex(int format, std::string& constant, int& used_constant, int& used_sampler, std::string& main);
+      int PipeType(int format);
+      void Pixel(int format, std::string& constant, int& used_constant, int& used_sampler, std::string& main);
+      void SetupConstant(ShaderConstant& sc);
+
+      inline void SetProjection(Matrix mat) {
+        projection_ = mat;
+      }
+      void SetTexture(Texture* tex);
+
+      Matrix projection_;
+      Texture* depth_;
+      int sampler_;
+      int uv_;
+    };
+
+    class ShadowMapProjectionBody
+      :public ShadowMapProjection
+      , public ShaderGenerator
+    {
+    public:
+      ShadowMapProjectionBody();
+    private:
+
+      ClassID(ShadowMapProjection);
+
+      void Vertex(int format, std::string& constant, int& used_constant, int& used_sampler, std::string& main);
+      int PipeType(int format);
+      void Pixel(int format, std::string& constant, int& used_constant, int& used_sampler, std::string& main);
+      void SetupConstant(ShaderConstant& sc);
+
+      inline void SetProjection(Matrix mat) {
+        projection_ = mat;
+      }
+      void SetTexture(Texture* tex);
+
+      Matrix projection_;
+      Texture* depth_;
+      int sampler_;
+      int uv_;
+    };
+
+    class GrassMapBody
+      :public GrassMap
+      , public ShaderGenerator
+    {
+    public:
+      GrassMapBody();
+    private:
+
+      ClassID(GrassMap);
+
+      void Vertex(int format, std::string& constant, int& used_constant, int& used_sampler, std::string& main);
+      int PipeType(int format);
+      void Pixel(int format, std::string& constant, int& used_constant, int& used_sampler, std::string& main);
+      void SetupConstant(ShaderConstant& sc);
+
+      inline void SetProjection(Matrix mat) {
+        projection_ = mat;
+      }
+      void SetTexture(Texture* tex);
+
+      Matrix projection_;
+      Texture* depth_;
+      int sampler_;
+      int uv_;
+    };
+
+    class GrassProjectorBody
+      :public GrassProjector
+      , public ShaderGenerator
+    {
+    public:
+      GrassProjectorBody();
+    private:
+
+      ClassID(GrassProjector);
+
+      void Vertex(int format, std::string& constant, int& used_constant, int& used_sampler, std::string& main);
+      int PipeType(int format);
+      void Pixel(int format, std::string& constant, int& used_constant, int& used_sampler, std::string& main);
+      void SetupConstant(ShaderConstant& sc);
+
+      inline void SetProjection(Matrix mat) {
+        projection_ = mat;
+      }
+      void SetTexture(Texture* tex);
+
+      Matrix projection_;
+      Texture* depth_;
       int sampler_;
       int uv_;
     };

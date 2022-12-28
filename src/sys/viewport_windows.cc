@@ -63,6 +63,7 @@ namespace
     :public ThreadMessage
   {
     HWND hwnd;
+    uint8_t* framebuffer;
     ThreadMessageWindowCreated(HWND hwnd)
       :ThreadMessage(WindowOpen), hwnd(hwnd) {}
   };
@@ -84,7 +85,7 @@ namespace
       :ThreadMessage(Mouse) {}
   };
 
-  class MessageFromWindow
+  struct MessageFromWindow
     :public Endpoint
   {
   public:
@@ -100,9 +101,10 @@ namespace
     {
       return size_;
     }
-  private:
+
     ViewportMessage* callback_;
     HWND hwnd_;
+    uint8_t* framebuffer_;
     SIZE size_;
     bool is_open_;
     bool is_close_;
@@ -204,6 +206,9 @@ namespace gh {
     void Open(const ViewportInitializeParameter& ip, ViewportMessage* cb);
     void Close();
     void* GetWindowHandle();
+    uint8_t* Framebuffer() {
+      return pass_.framebuffer_;
+    }
     void MessageFetch();
     void ChangeSize(int w, int h);
     ViewportBody();
@@ -362,7 +367,7 @@ namespace gh {
     case WM_MOUSEMOVE:
       tls->UpdateMousePos(hWnd);
       tls->SendMouse();
-      if (0 && down)
+      if constexpr (0 && down)
       {
         POINT to;
         RECT rc;
@@ -494,6 +499,34 @@ namespace gh {
                 SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)tls);
                 ShowWindow(hwnd, SW_SHOW);
                 UpdateWindow(hwnd);
+
+                if (tm->ip.using_framebuffer) {
+                  uint8_t* rgb;
+                  BITMAPINFOHEADER bmi;
+                  //bmi.bmiHeader.biBitCount = 24;
+                  memset(&bmi, 0, sizeof(bmi));
+                  bmi.biSize = sizeof(bmi);
+                  bmi.biWidth = tm->ip.width;
+                  bmi.biHeight = -tm->ip.height;
+                  bmi.biBitCount = 32;
+                  bmi.biPlanes = 1;
+                  bmi.biSizeImage = tm->ip.width * tm->ip.height * 4;
+                  HBITMAP dib = CreateDIBSection(NULL,(BITMAPINFO*) &bmi, DIB_RGB_COLORS,(void**) &rgb, NULL, 0);
+                  HDC dc = GetDC(hwnd);
+                  auto hdcBMP = CreateCompatibleDC(dc);
+                  auto hbmpOld = (HBITMAP)SelectObject(hdcBMP, dib);
+                  for (int y = 0; y < tm->ip.height; y++) {
+                    for (int x = 0; x < tm->ip.width; x++) {
+                      rgb[(y * tm->ip.width + x) * 4 + 0] = x%255;
+                      rgb[(y * tm->ip.width + x) * 4 + 1] = y%255;
+                      rgb[(y * tm->ip.width + x) * 4 + 2] = 0;
+                      rgb[(y * tm->ip.width + x) * 4 + 3] = 0;
+                    }
+                  }
+                  BitBlt(dc, 0, 0, tm->ip.width, tm->ip.height, hdcBMP, 0, 0, SRCCOPY);
+                  SelectObject(hdcBMP, hbmpOld);
+                  ReleaseDC(hwnd, dc);
+                }
 
                 uint8_t* context;
                 tls->pipe_->from->Lock(&context, sizeof(ThreadMessageWindowCreated));

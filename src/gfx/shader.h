@@ -6,7 +6,7 @@
 #include "color.h"
 namespace gh {
 
-  class Texture;
+  struct Texture;
 
   namespace shader {
 
@@ -21,6 +21,7 @@ namespace gh {
       ClassID_AmbientLight,
       ClassID_DiffuseLight,
       ClassID_SpecularLight,
+      ClassID_SoftLight,
       ClassID_Fractal,
       ClassID_DecalTexture,
       ClassID_NormalMap,
@@ -39,6 +40,10 @@ namespace gh {
       ClassID_Billboard,
       ClassID_ScreenSpaceDiffuse,
       ClassID_GaussianFilter,
+      ClassID_ShadowMap,
+      ClassID_ShadowMapProjection,
+      ClassID_GrassMap,
+      ClassID_GrassProjector,
     };
 #define ClassID(c)\
     bool compiled_;\
@@ -54,6 +59,7 @@ namespace gh {
     template<>struct TypeInterface < ClassID_AmbientLight > { typedef class AmbientLight type; };
     template<>struct TypeInterface < ClassID_DiffuseLight > { typedef class DiffuseLight type; };
     template<>struct TypeInterface < ClassID_SpecularLight > { typedef class SpecularLight type; };
+    template<>struct TypeInterface < ClassID_SoftLight > { typedef class SoftLight type; };
     template<>struct TypeInterface < ClassID_Fractal > { typedef class Fractal type; };
     template<>struct TypeInterface < ClassID_DecalTexture > { typedef class DecalTexture type; };
     template<>struct TypeInterface < ClassID_NormalMap > { typedef class NormalMap type; };
@@ -72,6 +78,10 @@ namespace gh {
     template<>struct TypeInterface < ClassID_Billboard> { typedef class Billboard type; };
     template<>struct TypeInterface < ClassID_ScreenSpaceDiffuse> { typedef class ScreenSpaceDiffuse type; };
     template<>struct TypeInterface < ClassID_GaussianFilter> { typedef class GaussianFilter type; };
+    template<>struct TypeInterface < ClassID_ShadowMap> { typedef class ShadowMap type; };
+    template<>struct TypeInterface < ClassID_ShadowMapProjection> { typedef class ShadowMapProjection type; };
+    template<>struct TypeInterface < ClassID_GrassMap> { typedef class GrassMap type; };
+    template<>struct TypeInterface < ClassID_GrassProjector> { typedef class GrassProjector type; };
 
     class Shader
     {
@@ -142,6 +152,17 @@ namespace gh {
     {
     public:
       virtual void Diffuse(const Color& color) = 0;
+    };
+
+    class SoftLight
+      :public Shader
+    {
+    public:
+      virtual void Direction(const Vector3& dir) = 0;
+      virtual void Diffuse(const Color& color) = 0;
+      virtual void Specular(const Color& color) = 0;
+      virtual void Power(float power) = 0;
+      virtual void Ambient(const Color& color) = 0;
     };
 
     class Fractal
@@ -274,6 +295,38 @@ namespace gh {
       :public Shader
     {
     public:
+      virtual void SetTexture(Texture* tex) = 0;
+    };
+
+    class ShadowMap
+      :public Shader
+    {
+    public:
+      virtual void SetProjection(Matrix mat) = 0;
+      virtual void SetTexture(Texture* tex) = 0;
+    };
+
+    class ShadowMapProjection
+      :public Shader
+    {
+    public:
+      virtual void SetProjection(Matrix mat) = 0;
+      virtual void SetTexture(Texture* tex) = 0;
+    };
+
+    class GrassMap
+      :public Shader
+    {
+    public:
+      virtual void SetProjection(Matrix mat) = 0;
+      virtual void SetTexture(Texture* tex) = 0;
+    };
+
+    class GrassProjector
+      :public Shader
+    {
+    public:
+      virtual void SetProjection(Matrix mat) = 0;
       virtual void SetTexture(Texture* tex) = 0;
     };
 

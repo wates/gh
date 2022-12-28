@@ -564,7 +564,7 @@ namespace xfile
   }
 }
 
-/*
+
 namespace pmd
 {
   struct Header
@@ -1147,20 +1147,32 @@ bool Convert(gh::BinaryReader& f, pmx::PmxString& value, const char* info, pmx::
     std::vector<uint8_t> str;
     if (Convert(f, str, "str")) {
       value.length = str.size();
-      std::vector<jpncode::unicode> ws;
-      ws.resize(value.length / 2+1);
-      for (int i = 0; i < value.length / 2; i++) {
-        ws[i] = reinterpret_cast<uint16_t*>(str.data())[i];
+      for (int i = 0; i < value.length; i++) {
+        if (str[i] == 0) {
+        }else if (str[i] > 127) {
+          static const char kHex[] = "0123456789ABCDEF";
+          value.string += kHex[str[i] / 16];
+          value.string += kHex[str[i] % 16];
+        }
+        else {
+          value.string += str[i];
+        }
       }
-      ws.push_back(0);
 
-      auto len = jpncode::sjis_multibyte_charactors(ws.data());
-      char *mbs = new char[len.charactors + 1];
-      mbs[len.charactors] = 0;
-      jpncode::sjis_encode(ws.data(), mbs);
+      //std::vector<jpncode::unicode> ws;
+      //ws.resize(value.length / 2+1);
+      //for (int i = 0; i < value.length / 2; i++) {
+      //  ws[i] = reinterpret_cast<uint16_t*>(str.data())[i];
+      //}
+      //ws.push_back(0);
 
-      value.string = mbs;
-      delete[]mbs;
+      //auto len = jpncode::sjis_multibyte_charactors(ws.data());
+      //char *mbs = new char[len.charactors + 1];
+      //mbs[len.charactors] = 0;
+      //jpncode::sjis_encode(ws.data(), mbs);
+
+      //value.string = mbs;
+      //delete[]mbs;
       //LogPut(value.string.c_str());
       return true;
     }
@@ -1530,8 +1542,6 @@ CONVERT_OBJECT_MEMBER(header)
 && ::Convert(f, value.joint, "joint", value)
 CONVERT_OBJECT_END
 
-*/
-
 namespace vmd
 {
   struct Header
@@ -1752,6 +1762,12 @@ namespace gh {
       }
 
       int SCALAR(int n) {
+        if (componentType == 5120 || componentType == 5121) {
+          return reinterpret_cast<uint8_t*>(buf->buf)[n];
+        }
+        else if (componentType == 5122 || componentType == 5123) {
+          return reinterpret_cast<uint16_t*>(buf->buf)[n];
+        }
         return reinterpret_cast<int*>(buf->buf)[n];
       }
       Vector3 VEC3(int n) {
@@ -1761,6 +1777,14 @@ namespace gh {
         return reinterpret_cast<Vector2*>(buf->buf)[n];
       }
       Vector4 VEC4(int n) {
+        if (componentType == 5123) {
+          return Vec4(
+            reinterpret_cast<uint16_t*>(buf->buf)[n * 4 + 0] / 65535.0f,
+            reinterpret_cast<uint16_t*>(buf->buf)[n * 4 + 1] / 65535.0f,
+            reinterpret_cast<uint16_t*>(buf->buf)[n * 4 + 2] / 65535.0f,
+            reinterpret_cast<uint16_t*>(buf->buf)[n * 4 + 3] / 65535.0f
+          );
+        }
         return reinterpret_cast<Vector4*>(buf->buf)[n];
       }
       Matrix MAT4(int n) {
@@ -1814,7 +1838,12 @@ namespace gh {
         auto& o = j.object_items();
         accessor a;
         a.buf = &bufferViews[o.find("bufferView")->second.int_value()];
-        a.offset = o.find("byteOffset")->second.int_value();
+        if (o.find("byteOffset") == o.end()) {
+          a.offset = 0;
+        }
+        else {
+          a.offset = o.find("byteOffset")->second.int_value();
+        }
         a.type = o.find("type")->second.string_value();
         a.componentType = o.find("componentType")->second.int_value();
         a.count = o.find("count")->second.int_value();
@@ -1869,7 +1898,14 @@ namespace gh {
     if (top.end() != (i = top.find("nodes"))) {
       auto& nodes = i->second.array_items();
       std::vector<pair<int, string>> node_stack;
-      node_stack.push_back({ 0,"root" });
+      if (top.end() != top.find("scenes")) {
+        for (auto& j : J(top)["scenes"][0]["nodes"].a()) {
+          node_stack.push_back({ J(j).i(),"root" });
+        }
+      }
+      else {
+        node_stack.push_back({ 0,"root" });
+      }
       while (node_stack.size()) {
         auto n = node_stack[0];
         node_stack.erase(node_stack.begin());
@@ -1878,11 +1914,21 @@ namespace gh {
         bn.name = J(nodes[n.first])["name"].s();
         bn.transform.Identity();
         bn.inverse.Identity();
-        bn.transform.Translate(
-          J(nodes[n.first])["translation"][0].f(),
-          J(nodes[n.first])["translation"][1].f(),
-          J(nodes[n.first])["translation"][2].f()
-        );
+        if (J(nodes[n.first]).has("rotation")) {
+          bn.transform.Rotate(
+            J(nodes[n.first])["rotation"][0].f(),
+            J(nodes[n.first])["rotation"][1].f(),
+            J(nodes[n.first])["rotation"][2].f(),
+            J(nodes[n.first])["rotation"][3].f()
+          );
+        }
+        if (J(nodes[n.first]).has("translation")) {
+          bn.transform.Translate(
+            J(nodes[n.first])["translation"][0].f(),
+            J(nodes[n.first])["translation"][1].f(),
+            J(nodes[n.first])["translation"][2].f()
+          );
+        }
         if (J(nodes[n.first]).has("children")) {
           for (auto& c : J(nodes[n.first])["children"].j.array_items()) {
             node_stack.push_back({ c.int_value() ,bn.name });
@@ -1893,10 +1939,12 @@ namespace gh {
       }
     }
 
+#if 0 // ここでMesh作る必要ないかも
     std::vector<std::string> mesh_name_index;
     if (top.end() != (i = top.find("meshes"))) {
       mesh_name_index.resize(i->second.array_items().size());
     }
+
     if (top.end() != (i = top.find("nodes"))) {
       for (auto& j : i->second.array_items()) {
         auto o = j.object_items();
@@ -1905,10 +1953,16 @@ namespace gh {
           auto name = J(j)["name"].s();
           mesh_name_index[m->second.int_value()] = name;
           Bone* bt = root.GetChildFromName(name);
-          _.push(bt->shape);
+          if (bt) {
+            _.push(bt->shape);
+          }
+          else {
+            _.push(root.shape);
+          }
         }
       }
     }
+#endif
 
     std::vector<std::string> skin_name_index;
     if (top.end() != (i = top.find("skins"))) {
@@ -1969,8 +2023,14 @@ namespace gh {
         auto o = j.object_items();
         auto pr = o.find("primitives");
         auto name = J(o)["name"].s();
-        Bone* bt = root.GetChildFromName(mesh_name_index[mesh_num]);
-        Shape& sh = bt->shape[0];
+        //Bone* bt = root.GetChildFromName(mesh_name_index[mesh_num]);
+        //if (!bt) {
+        //  bt = &root;
+        //}
+        //Shape& sh = bt->shape[0];
+        //Meshは全部Rootに作る
+        root.shape.resize(root.shape.size() + 1);
+        Shape& sh = root.shape.back();
         for (auto& pa : pr->second.array_items()) {
           auto& p = pa.object_items();
           Subset& subset = _.push(sh.subset);
@@ -2043,8 +2103,10 @@ namespace gh {
           int indices = J(p)["indices"].i();
           auto& idx_acc = accessors[indices];
           subset.indices.resize(idx_acc.count);
-          subset.material.texture = materials[J(p)["material"].i()].decal;
-          subset.material.diffuse = materials[J(p)["material"].i()].color;
+          if (J(p).has("material")) {
+            subset.material.texture = materials[J(p)["material"].i()].decal;
+            subset.material.diffuse = materials[J(p)["material"].i()].color;
+          }
           int b = 0;
           int offsets[] = { 2,-1,2 };
           int ofn = 0;
@@ -2055,7 +2117,8 @@ namespace gh {
             v.normal = i;
             v.texture = i;
             v.color = i;
-            b += offsets[ofn % 3];
+            b++;
+            //b += offsets[ofn % 3];
             ofn++;
           }
         }
@@ -2084,7 +2147,6 @@ namespace gh {
     }
   }
 
-  /*
   bool ParsePMX(const char* buf, int len, Bone& root)
   {
     root.absolute.Identity();
@@ -2109,7 +2171,7 @@ namespace gh {
     sh.normal.resize(vertices);
     sh.texture.resize(vertices);
 
-    // 重みをボーンに設定 
+    // 重みをボーンに設定
     sh.weight.resize(fmt.bone.size());
 
     // 頂点組み立て
@@ -2269,10 +2331,10 @@ namespace gh {
       }
       bone->name = b.name.string;
       bone->absolute.Identity();
-      bone->absolute.Translate(b.base);// 絶対座標 
+      bone->absolute.Translate(b.base);// 絶対座標
     }
 
-    // アニメーション時のオフセット設定 
+    // アニメーション時のオフセット設定
     for (int i = 0; i < sh.weight.size(); i++)
     {
       Bone* bone = root.GetChildFromName(list[i]);
@@ -2281,7 +2343,7 @@ namespace gh {
       sh.weight[i].bonename = bone->name;
     }
 
-    // ボーン位置を相対座標に変換 
+    // ボーン位置を相対座標に変換
     //for (int i = fmt.bone.size() - 1; i >= 0; i--)
     for (int i = 0; i < fmt.bone.size(); i++)
     {
@@ -2343,7 +2405,7 @@ namespace gh {
       //    bone->rigid.push_back(d);
       //  }
       //}
-      //else 
+      //else
       {
         root.rigid.push_back(d);
       }
@@ -2392,7 +2454,7 @@ namespace gh {
     sh.normal.resize(vertices);
     sh.texture.resize(vertices);
 
-    // 重みをボーンに設定 
+    // 重みをボーンに設定
     sh.weight.resize(fmt.bone.size());
 
     // 頂点組み立て
@@ -2522,11 +2584,11 @@ namespace gh {
       }
       bone->name = src.name;
       bone->absolute.Identity();
-      bone->absolute.Translate(src.base);// 絶対座標 
+      bone->absolute.Translate(src.base);// 絶対座標
       list.push_back(bone->name);
     }
 
-    // アニメーション時のオフセット設定 
+    // アニメーション時のオフセット設定
     for (int i = 0; i < sh.weight.size(); i++)
     {
       Bone* bone = root.GetChildFromName(list[i]);
@@ -2535,7 +2597,7 @@ namespace gh {
       sh.weight[i].bonename = bone->name;
     }
 
-    // ボーン位置を相対座標に変換 
+    // ボーン位置を相対座標に変換
     //for (int i = fmt.bone.size() - 1; i >= 0; i--)
     for (int i = 0; i < fmt.bone.size(); i++)
     {
@@ -2596,7 +2658,7 @@ namespace gh {
       //    bone->rigid.push_back(d);
       //  }
       //}
-      //else 
+      //else
       {
         root.rigid.push_back(d);
       }
@@ -2621,7 +2683,6 @@ namespace gh {
 
     return true;
   }
-  */
 
   bool ParseVMD(const char* buf, int len, Animation& anim)
   {
@@ -2904,8 +2965,8 @@ namespace gh {
           last = pkey + t;
         }
       }
-    }
   }
+}
 
   void AnimatedPose::SetTime(float count)
   {
@@ -3259,6 +3320,39 @@ namespace gh {
     {
       child[i].ReverseCulling();
     }
+  }
+
+  void Shape::SubsetMerge()
+  {
+    if (subset.size() < 1)
+      return;
+    Subset base;
+    int total = 0;
+    for (const auto& i : subset) {
+      total += i.indices.size();
+    }
+    base.indices.resize(total);
+    base.material.texture = subset[0].material.texture;
+    base.material.diffuse = 0xffffffff;
+    base.material.power = 0;
+    base.material.specular = 0;
+    base.material.ambient = 0xffffffff;
+    int c = 0, n = 0;
+    color.resize(0);
+    for (const auto& i : subset) {
+      color.push_back(i.material.diffuse);
+      for (auto j : i.indices) {
+        base.indices[c].position = j.position;
+        base.indices[c].normal = j.normal;
+        base.indices[c].texture = j.texture;
+        base.indices[c].color = n;
+        c++;
+      }
+      n++;
+    }
+
+    subset.resize(1);
+    subset[0] = base;
   }
 }
 

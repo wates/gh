@@ -41,14 +41,14 @@ namespace gh {
     std::string name;
     std::string parent;
     std::string current;
-    Vector3 pos; // 諸データ：位置(x, y, z) // 諸データ：位置合せでも設定可
-    Vector3 rot; // 諸データ：回転(rad(x), rad(y), rad(z))
-    Vector3 pos_min; // 制限：移動1(x, y, z)
-    Vector3 pos_max; // 制限：移動2(x, y, z)
-    Vector3 rot_min; // 制限：回転1(rad(x), rad(y), rad(z))
-    Vector3 rot_max; // 制限：回転2(rad(x), rad(y), rad(z))
-    Vector3 spring_pos; // ばね：移動(x, y, z)
-    Vector3 spring_rot; // ばね：回転(rad(x), rad(y), rad(z))
+    Vector3 pos;
+    Vector3 rot;
+    Vector3 pos_min;
+    Vector3 pos_max;
+    Vector3 rot_min;
+    Vector3 rot_max;
+    Vector3 spring_pos;
+    Vector3 spring_rot;
 
   };
 

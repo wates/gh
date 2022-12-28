@@ -15,8 +15,8 @@ DocRender::DocRender(gh::Graphics* gf) {
   this->gf = gf;
   CreateManagedGraphics(&mg);
   mg->Initialize(gf);
-  cam = gf->CreateShader < gh::shader::ShaderType::ClassID_Camera>();
-
+  cam = gf->CreateShader < shader::ShaderType::ClassID_Camera>();
+  shadow = gf->CreateShader<shader::ShaderType::ClassID_ShadowMap>();
 }
 
 typedef Fertex<FTX_POSITION | FTX_DIFFUSE> Vertex;

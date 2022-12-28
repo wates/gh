@@ -67,7 +67,7 @@ struct Scene1 :public Controller {
   FovCamera cam;
   bool ltouch = false;
   float forward = 0;
-  float yaw = PI/2, pitch = 0;
+  float yaw = PI / 2, pitch = 0;
   float delta_x = 0, delta_y = 0;
   HexBlock b;
 
@@ -153,11 +153,11 @@ struct Scene1 :public Controller {
         "tree_thin_fall.glb" };
       DocMesh* m = new DocMesh();
       m->path = "/model/kenny_nature/";
-      m->path += trees[i%(sizeof(trees)/sizeof(*trees))];
+      m->path += trees[i % (sizeof(trees) / sizeof(*trees))];
       m->pose.Identity();
       m->pose.Scale(-1, 1, 1);
       m->pose.RotateY(i / 10.0f);
-      m->pose.Translate((i % 10) * 2-10, 0, (i / 10) * 2-10);
+      m->pose.Translate((i % 10) * 2 - 10, 0, (i / 10) * 2 - 10);
       root.Append(m);
     }
 
@@ -264,29 +264,28 @@ int main(int, char**)
   con.push_back(&scn);
 
   m.vp = CreateViewport(p, &m);
+  while (!m.is_open) {
+    m.vp->MessageFetch();
+    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+  }
   int count = 0;
   while (!m.is_close) {
     m.vp->MessageFetch();
-    if (m.is_open) {
-      count++;
-      _(con).each([](Controller* c) {
-        c->Update();
-        });
-      m.gf->clear();
-      m.gf->BeginScene();
-      Matrix mat;
-      mat.Identity();
-      mat.Scale(0.001f);
-      //fm->DrawColor(mat, L"abcdEFG", 0xff44ffee);
+    count++;
+    _(con).each([](Controller* c) {
+      c->Update();
+      });
+    m.gf->clear();
+    m.gf->BeginScene();
+    Matrix mat;
 
-      _(con).each([](Controller* c) {
-        c->Draw();
-        });
-      mat.Identity();
-      mat.Scale(10);
-      m.gf->EndScene();
-      m.gf->Flip(m.vp);
-    }
+    _(con).each([](Controller* c) {
+      c->Draw();
+      });
+    mat.Identity();
+    mat.Scale(10);
+    m.gf->EndScene();
+    m.gf->Flip(m.vp);
     std::this_thread::sleep_for(std::chrono::milliseconds(1));
   }
   DeleteViewport(m.vp);

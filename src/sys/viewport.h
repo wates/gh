@@ -4,12 +4,13 @@ namespace gh {
 
   struct ViewportInitializeParameter
   {
-    char name[64] = { "a" };
+    char name[64] = { "game" };
     int width = 1280;
     int height = 720;
     bool full_screen = false;
     bool fixed_resolution = false;
     bool layered = false;
+    bool using_framebuffer = false;
   };
 
   struct ViewportMessage
@@ -36,6 +37,7 @@ namespace gh {
     virtual int Width()const = 0;
     virtual int Height()const = 0;
     virtual void SetSize(int w, int h) = 0;
+    virtual std::uint8_t *Framebuffer() = 0;
 
     inline virtual ~Viewport() {};
   };

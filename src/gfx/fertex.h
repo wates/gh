@@ -25,6 +25,7 @@ namespace gh {
   static const int FTX_VIEW_DIRECTION = 0x10000;
   static const int FTX_LIGHT_DIRECTION = 0x20000;
   static const int FTX_VIEWPORT_POSITION = 0x40000;//for VPOS / gl_FlagCoord
+  static const int FTX_FLOAT4_TEX1 = 0x100000;//xyzw@tex1
 
   template<int FTX, int MASK = FTX & FTX_POSITION>
   struct FTX_Position
